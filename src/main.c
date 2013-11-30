@@ -4,7 +4,7 @@
 #include <unistd.h>
 #include "bmp.h"
 
-#define HEADER_LENGTH 2
+#define SIGNATURE_LENGTH 2
 
 const char usage[] = "Usage: %s <filenname>\n";
 
@@ -16,8 +16,8 @@ int main(int argc, char *argv[])
 	}
 
 	int fd = open(argv[1], O_RDONLY);
-	char buf[HEADER_LENGTH];
-	ssize_t bytes = read(fd, buf, HEADER_LENGTH);
+	char buf[SIGNATURE_LENGTH];
+	ssize_t bytes = read(fd, buf, SIGNATURE_LENGTH);
 	if (bytes == -1) {
 		perror("error reading file");
 		return 1;
