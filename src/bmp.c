@@ -15,7 +15,6 @@ int print_bmp(int fd)
 	}
 
 	BMP_header *header = (BMP_header*)buf;
-	printf("dimensions: %d x %d\n\n", header->width, header->height);
 
 	if (header->num_colors != 0 || header->bits_per_pixel < 8) {
 		puts("Error: BMPs with color tables are currently unsupported");
