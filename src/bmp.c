@@ -1,9 +1,21 @@
 #include <stddef.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <sys/types.h>
+#include <unistd.h>
 #include "bmp.h"
 
-int print_bmp(char buf[])
+#define BOTH_HEADERS sizeof(BMP_header) + sizeof(DIB_header)
+
+int print_bmp(int fd)
 {
+	char buf[BOTH_HEADERS];
+	ssize_t bytes = read(fd, buf, BOTH_HEADERS);
+	if (bytes == -1) {
+		perror("error reading file");
+		return 1;
+	}
+
 	BMP_header *bmp_header = (BMP_header*)buf;
 	DIB_header *dib_header = (DIB_header*)(bmp_header + 1);
 
@@ -19,7 +31,15 @@ int print_bmp(char buf[])
 		return 1;
 	}
 
-	char  *pixels = buf + bmp_header->pixels_offset;
+	char  *pixels = malloc(dib_header->pixel_array_size);
+	lseek(fd, bmp_header->pixels_offset, SEEK_SET);
+	bytes = read(fd, pixels, dib_header->pixel_array_size);
+	if (bytes == -1) {
+		perror("error reading file");
+		free(pixels);
+		return 1;
+	}
+
 	size_t column = 0;
 	int    row    = dib_header->height - 1;
 
@@ -46,5 +66,6 @@ int print_bmp(char buf[])
 		}
 	}
 
+	free(pixels);
 	return 0;
 }

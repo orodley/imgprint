@@ -34,4 +34,4 @@ typedef struct DIB_header
 #define BI_JPEG 4      // JPEG or RLE-24 compression
 #define BI_PNG 5       // The bitmap contains a PNG image
 
-int print_bmp(char buf[]);
+int print_bmp(int fd);
