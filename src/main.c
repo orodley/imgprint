@@ -22,7 +22,7 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
-	switch (buf[0]) {
+	switch (buf[0] << 8 | buf[1]) {
 	case BMP_SIGNATURE:
 		print_bmp(buf);
 		return 0;
