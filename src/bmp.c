@@ -27,6 +27,11 @@ int print_bmp(int fd)
 		return 1;
 	}
 
+	if (header->compression_method != BI_RGB) {
+		puts("Error: compressed BMPs are currently unsupported");
+		return 1;
+	}
+
 	char  *pixels = malloc(header->pixel_array_size);
 	lseek(fd, header->pixels_offset, SEEK_SET);
 	bytes = read(fd, pixels, header->pixel_array_size);
