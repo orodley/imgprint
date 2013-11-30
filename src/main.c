@@ -24,8 +24,7 @@ int main(int argc, char *argv[])
 
 	switch (buf[0] << 8 | buf[1]) {
 	case BMP_SIGNATURE:
-		print_bmp(buf);
-		return 0;
+		return print_bmp(buf);
 	default:
 		puts("Error: unrecognized file format");
 		return 1;

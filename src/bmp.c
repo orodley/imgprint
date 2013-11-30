@@ -1,16 +1,44 @@
+#include <stddef.h>
 #include <stdio.h>
 #include "bmp.h"
 
-void print_bmp(char buf[])
+int print_bmp(char buf[])
 {
-	puts("It's a BMP!");
-
 	BMP_header *bmp_header = (BMP_header*)buf;
-	printf(" file size = %d\n", bmp_header->file_size);
-	printf(" offset to pixel array = %d\n", bmp_header->pixels_offset);
-
 	DIB_header *dib_header = (DIB_header*)(bmp_header + 1);
-	printf(" dimensions = %d x %d\n", dib_header->width, dib_header->height);
-	printf(" bits per pixel = %d\n", dib_header->bits_per_pixel);
-	printf(" number of colors = %d\n", dib_header->num_colors);
+
+	if (dib_header->num_colors != 0 || dib_header->bits_per_pixel < 8) {
+		puts("Error: BMPs with color tables are currently unsupported");
+		return 1;
+	}
+
+	if (dib_header->bits_per_pixel != 24) { // Just support one size for now
+		puts("Error: BMPs with bpp other than 24 are currently unsupported");
+		return 1;
+	}
+
+	char *pixels = buf + bmp_header->pixels_offset;
+	size_t column = 0;
+	for (size_t i = 0; i < dib_header->pixel_array_size; i += 3) {
+		uint8_t b = pixels[i];
+		uint8_t g = pixels[i + 1];
+		uint8_t r = pixels[i + 2];
+
+		if (r + g + b < (256 * 3) / 2)
+			putchar(' ');
+		else
+			putchar('#');
+
+		column++;
+		if (column == dib_header->width) {
+			putchar('\n');
+
+			if (column % 4 != 0)
+				i += 4 - (column % 4);
+
+			column = 0;
+		}
+	}
+
+	return 0;
 }
