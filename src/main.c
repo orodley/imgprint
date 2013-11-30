@@ -1,10 +1,11 @@
 #include <fcntl.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <unistd.h>
+#include "common.h"
+#include "bmp.h"
 
 const char usage[] = "Usage: %s <filenname>\n";
-
-#define READ_SIZE 2048
 
 int main(int argc, char *argv[])
 {
@@ -13,19 +14,20 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
-	//FILE *file = fopen(argv[1], "r");
 	int fd = open(argv[1], O_RDONLY);
 	char buf[READ_SIZE];
-	ssize_t bytes;
-	do {
-		bytes = read(fd, buf, READ_SIZE);
-		if (bytes == -1) {
-			perror("error reading file");
-			return 1;
-		}
+	ssize_t bytes = read(fd, buf, READ_SIZE);
+	if (bytes == -1) {
+		perror("error reading file");
+		return 1;
+	}
 
-		write(STDOUT_FILENO, buf, bytes);
-	} while (bytes == READ_SIZE);
-
-	return 0;
+	switch (buf[0]) {
+	case BMP_SIGNATURE:
+		print_bmp(buf);
+		return 0;
+	default:
+		puts("Error: unrecognized file format");
+		return 1;
+	}
 }
