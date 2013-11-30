@@ -2,17 +2,13 @@
 
 #define BMP_SIGNATURE 0x424D
 
-typedef struct BMP_header
+typedef struct BMP_Header
 {
 	uint16_t signature;
 	uint32_t file_size;
 	uint16_t reserved1;
 	uint16_t reserved2;
 	uint32_t pixels_offset;
-} __attribute__((packed)) BMP_header;
-
-typedef struct DIB_header
-{
 	uint32_t header_size;
 	uint32_t width;
 	uint32_t height;
@@ -24,7 +20,7 @@ typedef struct DIB_header
 	uint32_t vertical_resolution;
 	uint32_t num_colors;
 	uint32_t num_important_colors;
-} __attribute__((packed)) DIB_header;
+} __attribute__((packed)) BMP_header;
 
 // Compression methods (used in DIB_header.compression_method)
 #define BI_RGB 0       // no compression

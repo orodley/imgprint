@@ -5,35 +5,31 @@
 #include <unistd.h>
 #include "bmp.h"
 
-#define BOTH_HEADERS sizeof(BMP_header) + sizeof(DIB_header)
-
 int print_bmp(int fd)
 {
-	char buf[BOTH_HEADERS];
-	ssize_t bytes = read(fd, buf, BOTH_HEADERS);
+	char buf[sizeof(BMP_header)];
+	ssize_t bytes = read(fd, buf, sizeof(BMP_header));
 	if (bytes == -1) {
 		perror("error reading file");
 		return 1;
 	}
 
-	BMP_header *bmp_header = (BMP_header*)buf;
-	DIB_header *dib_header = (DIB_header*)(bmp_header + 1);
+	BMP_header *header = (BMP_header*)buf;
+	printf("dimensions: %d x %d\n\n", header->width, header->height);
 
-	printf("dimensions: %d x %d\n\n", dib_header->width, dib_header->height);
-
-	if (dib_header->num_colors != 0 || dib_header->bits_per_pixel < 8) {
+	if (header->num_colors != 0 || header->bits_per_pixel < 8) {
 		puts("Error: BMPs with color tables are currently unsupported");
 		return 1;
 	}
 
-	if (dib_header->bits_per_pixel != 24) { // Just support one size for now
+	if (header->bits_per_pixel != 24) { // Just support one size for now
 		puts("Error: BMPs with bpp other than 24 are currently unsupported");
 		return 1;
 	}
 
-	char  *pixels = malloc(dib_header->pixel_array_size);
-	lseek(fd, bmp_header->pixels_offset, SEEK_SET);
-	bytes = read(fd, pixels, dib_header->pixel_array_size);
+	char  *pixels = malloc(header->pixel_array_size);
+	lseek(fd, header->pixels_offset, SEEK_SET);
+	bytes = read(fd, pixels, header->pixel_array_size);
 	if (bytes == -1) {
 		perror("error reading file");
 		free(pixels);
@@ -41,9 +37,9 @@ int print_bmp(int fd)
 	}
 
 	size_t column = 0;
-	int    row    = dib_header->height - 1;
+	int    row    = header->height - 1;
 
-	size_t row_width = 3 * dib_header->width;
+	size_t row_width = 3 * header->width;
 	if (row_width % 4 != 0)
 		row_width += 4 - (row_width % 4);
 
@@ -59,7 +55,7 @@ int print_bmp(int fd)
 			putchar('#');
 
 		column++;
-		if (column == dib_header->width) {
+		if (column == header->width) {
 			putchar('\n');
 			row--;
 			column = 0;
