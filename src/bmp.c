@@ -4,6 +4,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include "bmp.h"
+#include "color.h"
 
 int print_bmp(int fd)
 {
@@ -49,23 +50,13 @@ int print_bmp(int fd)
 	if (row_width % 4 != 0)
 		row_width += 4 - (row_width % 4);
 
-	uint32_t max = 0;
-	for (size_t n = 0; n < bytes_per_pixel / 3; n++) {
-		max <<= 8;
-		max |= 0xFF;
-	}
-	max *= 3;
-
 	while (row > 0) {
 		size_t i = row * row_width + (column * bytes_per_pixel);
 		uint8_t b = pixels[i];
 		uint8_t g = pixels[i + 1];
 		uint8_t r = pixels[i + 2];
-
-		if ((uint32_t)(r + g + b) < max / 2)
-			putchar(' ');
-		else
-			putchar('#');
+		Color c = { r, g, b };
+		print_pixel(closest_color(c));
 
 		column++;
 		if (column == header->width) {
